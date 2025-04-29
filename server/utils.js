@@ -1,13 +1,5 @@
-const {Url} = require("./index");
-// const sqlite3 = require('sqlite3').verbose();
-// const db = new sqlite3.Database('./db/app.db');
-//
-// db.run(`
-//         CREATE TABLE IF NOT EXISTS data(
-//         id TEXT,
-//         url TEXT
-//         ) STRICT
-// `);
+import { Url } from "./optimizer/mongoDBConfig";
+
 
 function makeID(length) {
     let result = '';
@@ -23,7 +15,7 @@ function makeID(length) {
 
 async function findOrigin(id) {
     try {
-        const url = await Url.findByPk(id);
+        const url = await Url.findOne({ id });
         return url ? url.url : null;
     } catch (error) {
         throw new Error(`Error finding url:  ${error.message}`);
@@ -32,7 +24,10 @@ async function findOrigin(id) {
 
 async function create(id, url) {
     try {
-        await Url.create({id, url});
+        const newEntry = new URLModel({ id, url });
+
+        await newEntry.save();
+        console.log("Created new short URL:", id);
         return id;
     } catch (error) {
         throw new Error(`Error creating shorted url: ${error.message}`);
