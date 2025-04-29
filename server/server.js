@@ -1,12 +1,9 @@
-const express = require('express')
-const lib = require('./utils')
-const {initDb} = require("./index");
-const app = express()
+import express from 'express';
+import * as lib from './utils.js';
+
+const app = express();
 const port = 3001;
 
-(async () => {
-    await initDb();
-})();
 
 app.get('/short/:id', async (req, res) => {
     try {

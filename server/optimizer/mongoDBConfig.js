@@ -11,8 +11,15 @@ mongoose
 
 // Schema
 const urlSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
-  url: { type: String, required: true },
+  id: { 
+    type: String, 
+    required: true, 
+    unique: true 
+},
+  url: { 
+    type: String, 
+    required: true 
+},
 });
 
 const Url = mongoose.model("URL", urlSchema);

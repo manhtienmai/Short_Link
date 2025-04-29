@@ -1,5 +1,22 @@
-import { Url } from "./optimizer/mongoDBConfig";
+import { Url } from './optimizer/mongoDBConfig.js';
+import { connectRedis } from "./optimizer/redisConfig.js";
 
+
+function isValidUrl(url) {
+    return /^https?:\/\//.test(url); // Chỉ kiểm tra các URL bắt đầu với http:// hoặc https://
+  }
+
+  // Kết nối tới Redis
+async function redisConnection() {
+    try {
+      await connectRedis();
+      console.log("Connected to Redis.");
+    } catch (err) {
+      console.error("Failed to connect to Redis:", err.message);
+    }
+  }
+redisConnection();
+  
 
 function makeID(length) {
     let result = '';
@@ -15,8 +32,18 @@ function makeID(length) {
 
 async function findOrigin(id) {
     try {
-        const url = await Url.findOne({ id });
-        return url ? url.url : null;
+        let cachedUrl = await getCache(id);
+    if (cachedUrl) {
+      return cachedUrl;
+    }
+    // Nếu không có trong Redis, truy vấn MongoDB
+    const doc = await Url.findOne({ id });
+    if (!doc) return null;
+    cachedUrl = doc.url;
+
+    // Lưu vào Redis cache
+    await setCache(id, doc.url);
+    return cachedUrl;
     } catch (error) {
         throw new Error(`Error finding url:  ${error.message}`);
     }
@@ -24,43 +51,34 @@ async function findOrigin(id) {
 
 async function create(id, url) {
     try {
-        const newEntry = new URLModel({ id, url });
-
+        if (!isValidUrl(url)){
+            throw new Error("Invalid URL provided.");
+        }
+        const newEntry = new Url({ id, url });
         await newEntry.save();
         console.log("Created new short URL:", id);
+
+        // Lưu vào Redis cache
+        await setCache(id, url);
+
         return id;
     } catch (error) {
         throw new Error(`Error creating shorted url: ${error.message}`);
     }
 }
 
-// function findOrigin(id) {
-//     return new Promise((resolve, reject) => {
-//         return db.get(`SELECT * FROM data WHERE id = ?`, [id], function (err, res) {
-//             if (err) {
-//                 return reject(err.message);
-//             }
-//             if (res != undefined) {
-//                 return resolve(res.url);
-//             } else {
-//                 return resolve(null);
-//             }
-//         });
-//     });
-// }
-
-// function create(id, url) {
-//     return new Promise((resolve, reject) => {
-//         return db.run(`INSERT INTO data VALUES (?, ?)`, [id, url], function (err) {
-//             if (err) {
-//                 return reject(err.message);
-//             }
-//             return resolve(id);
-//         });
-//     });
-// }
 
 async function shortUrl(url) {
+    const cachedId = await getCache(url);
+    if (cachedId) {
+      return cachedId; 
+    }
+    const existingEntry = await URLModel.findOne({ url });
+    if (existingEntry) {
+      // Lưu vào Redis cache
+      await setCache(existingEntry.id, url);
+      return existingEntry.id; 
+    }
     while (true) {
         let newID = makeID(5);
         let originUrl = await findOrigin(newID);
@@ -71,7 +89,4 @@ async function shortUrl(url) {
     }
 }
 
-module.exports = {
-    findOrigin,
-    shortUrl
-}
+export { findOrigin, shortUrl };
