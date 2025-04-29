@@ -1,5 +1,5 @@
 import { Url } from './optimizer/mongoDBConfig.js';
-import { connectRedis } from "./optimizer/redisConfig.js";
+import { connectRedis, getCache, setCache } from "./optimizer/redisConfig.js";
 
 
 function isValidUrl(url) {
@@ -71,13 +71,13 @@ async function create(id, url) {
 async function shortUrl(url) {
     const cachedId = await getCache(url);
     if (cachedId) {
-      return cachedId; 
+        return cachedId; 
     }
-    const existingEntry = await URLModel.findOne({ url });
+    const existingEntry = await Url.findOne({ url });
     if (existingEntry) {
-      // Lưu vào Redis cache
-      await setCache(existingEntry.id, url);
-      return existingEntry.id; 
+        // Lưu vào Redis cache
+        await setCache(existingEntry.id, url);
+        return existingEntry.id; 
     }
     while (true) {
         let newID = makeID(5);
