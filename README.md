@@ -1,3 +1,4 @@
+Đã dùng sequelize để them lớp persistent bằng cách sử dụng ORM (Object-Relational Mapping)
 # CASE STUDY 1
 Dưới đây là một chương trình đơn giản sử dụng `express.js`, có mục tiêu để rút gọn link. Chương trình có thể chưa hoàn toàn được tối ưu.
 
