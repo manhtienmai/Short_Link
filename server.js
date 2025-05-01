@@ -1,16 +1,22 @@
-const express = require('express')
-const lib = require('./utils')
-const {initDb} = require("./index");
+
+import express from "express";
+import * as lib from "./utils.js";
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import cors from "cors";
+import middleware from "./middleware.js";
+import * as path from "node:path";
+
 const app = express()
 const port = 3001;
-const middleware = require('./middleware');
-(async () => {
-    await initDb();
-})();
-
-app.use(express.json()); // xu li json body
+app.use(express.json());
+app.use(cors());
 app.use(middleware.logger); // ghi log moi request
 app.use(middleware.validateUrl);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+app.use(express.static(join(__dirname, 'public')));
 
 app.get('/short/:id', async (req, res, next) => {
     try {
@@ -36,6 +42,10 @@ app.post('/create', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(join(__dirname, 'public', 'index.html'));
 });
 
 app.use(middleware.notFound);

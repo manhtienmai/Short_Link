@@ -2,3 +2,9 @@ node_modules
 app.db
 output.pdf
 .DS_Store
+
+client/node_modules
+server/node_modules
+/.env
+.env
+.env

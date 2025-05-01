@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Shortener Project</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <h1>URL Shortener</h1>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="shorten">Shorten URL</div>
+    <div class="tab" data-tab="expand">Get Original URL</div>
+  </div>
+
+  <!-- Shorten URL section -->
+  <div id="shorten-tab" class="tab-content active">
+    <div class="input-group">
+      <input type="text" id="url-input" placeholder="Paste long URL here" />
+      <button id="shorten-btn">Shorten</button>
+    </div>
+
+    <div id="shorten-message" class="message"></div>
+
+    <div id="shorten-result" class="result">
+      <h3>Your shortened URL:</h3>
+      <div class="result-link">
+        <input type="text" id="shortened-url" readonly />
+        <button id="copy-btn" class="copy-btn">Copy</button>
+      </div>
+      <p>Original: <span id="original-url"></span></p>
+    </div>
+  </div>
+
+  <!-- Expand URL section -->
+  <div id="expand-tab" class="tab-content">
+    <div class="input-group">
+      <input type="text" id="short-url-input" placeholder="Paste short URL or ID" />
+      <button id="expand-btn">Get URL</button>
+    </div>
+
+    <div id="expand-message" class="message"></div>
+
+    <div id="expand-result" class="result">
+      <h3>Original URL:</h3>
+      <div class="result-link">
+        <input type="text" id="full-url" readonly />
+        <button id="full-copy-btn" class="copy-btn">Copy</button>
+      </div>
+      <p>
+        <a id="visit-link" href="#" target="_blank">Visit website</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

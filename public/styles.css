@@ -1,0 +1,145 @@
+body {
+    background-color: #edf2f7;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 90%;
+    max-width: 500px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 40px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2563eb;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.tab.active {
+    border-bottom-color: #2563eb;
+    color: #2563eb;
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.input-group {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+input {
+    width: 70%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1d4ed8;
+}
+
+.result {
+    display: none;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8fafc;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.result-link {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.copy-btn {
+    background-color: #f8fafc;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.message {
+    display: none;
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.message.error {
+    background-color: #fecaca;
+    color: #dc2626;
+}
+
+.message.success {
+    background-color: #bbf7d0;
+    color: #16a34a;
+}
+
+@media (max-width: 480px) {
+    .container {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    input, button {
+        width: 100%;
+    }
+
+    button {
+        margin-top: 8px;
+    }
+
+    .result-link {
+        flex-direction: column;
+    }
+
+    .copy-btn {
+        margin-top: 8px;
+        align-self: flex-start;
+    }
+}

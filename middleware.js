@@ -1,12 +1,12 @@
 
 // ghi log thong tin request
-const logger = (req, res, next) => {
+export const logger = (req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
 }
 
 //kiem tra URL
-const validateUrl = (req, res, next) => {
+export const validateUrl = (req, res, next) => {
     if (req.path === '/create') {
         const url = req.query.url;
         if (!url) {
@@ -25,15 +25,15 @@ const validateUrl = (req, res, next) => {
     }
 }
 
-const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, req, res, next) => {
     console.error('Error', err);
     res.status(500).json({ error: 'Internal server error'});
 };
 
-const notFound = (req, res) => {
+export const notFound = (req, res) => {
     res.status(404).json({ error : 'route not found'});
 };
 
-module.exports = {
-    logger, validateUrl, errorHandler, notFound
+export default {
+    logger, validateUrl, errorHandler, notFound,
 };
