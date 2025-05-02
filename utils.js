@@ -41,6 +41,7 @@ async function findOrigin(id) {
 
         // Lưu vào Redis cache
         await setCache(id, doc.url);
+        await setCache(doc.url, id);
         return cachedUrl;
     } catch (error) {
         throw new Error(`Error finding url:  ${error.message}`);
@@ -58,6 +59,7 @@ async function create(id, url) {
 
         // Lưu vào Redis cache
         await setCache(id, url);
+        await setCache(url, id);
 
         return id;
     } catch (error) {
@@ -74,11 +76,12 @@ async function shortUrl(url) {
     if (existingEntry) {
         // Lưu vào Redis cache
         await setCache(existingEntry.id, url);
+        await setCache(url, existingEntry.id);
         return existingEntry.id;
     }
     while (true) {
         let newID = makeID(5);
-        let originUrl = await findOrigin(newID);
+        const originUrl = await getCache(newID) || await Url.findOne({ id: newID }); // tối ưu bằng cách tìm trong cache trước sẽ nhanh hơn
         if (originUrl == null) {
             await create(newID, url)
             return newID;

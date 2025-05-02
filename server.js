@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import cors from "cors";
 import middleware from "./middleware.js";
+import { callWithRetry } from "./optimizer/retryHelper.js";
 import * as path from "node:path";
 
 const app = express()
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(cors());
 app.use(middleware.logger); // ghi log moi request
 app.use(middleware.validateUrl);
+app.use(middleware.rateLimit);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,7 +23,7 @@ app.use(express.static(join(__dirname, 'public')));
 app.get('/short/:id', async (req, res, next) => {
     try {
         const id = req.params.id;
-        const url = await lib.findOrigin(id);
+        const url = await callWithRetry(() => lib.findOrigin(id));
         if (url == null) {
             res.send("<h1>404</h1>");
         }
@@ -36,9 +38,8 @@ app.get('/short/:id', async (req, res, next) => {
 app.post('/create', async (req, res, next) => {
     try {
         const url = req.query.url;
-        const newID = await lib.shortUrl(url);
+        const newID = await callWithRetry(() => lib.shortUrl(url));
         res.send(newID);
-
     } catch (err) {
         next(err);
     }
