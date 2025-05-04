@@ -164,7 +164,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 
 ### 1. **Chuyển từ SQLite sang MongoDB với ORM (Mongoose)**
 - Ban đầu nhóm có cải tiến bằng việc sử dụng thư viện Sequelize để định nghĩa Schema cho model Link.
-- Sử dụng ORM để viết hai hàm findOriginORM và createORM trong [branch dev-v0.1 và trong file utils](https://github.com/ngoctuannguyen/KTPM-architecture-solution/blob/main/CS1/utils.js).
+- Sử dụng ORM để viết hai hàm findOriginORM và createORM trong [branch dev-v0.1 và trong file utils](https://github.com/manhtienmai/Short_Link/blob/dev-v0.1/utils.js).
 
 -Tuy nhiên, do SQLite có hạn chế trong việc xử lý nhiều kết nối đồng thời, dẫn đến hiện tượng nghẽn cổ chai khi truy cập dữ liệu song song, nhóm đã đề xuất chuyển sang sử dụng MongoDB làm cơ sở dữ liệu chính và xây dựng lại lớp persistent layer sử dụng ORM Mongoose.
 
@@ -360,7 +360,8 @@ Sau khi thực hiện test với 30000 request trong 60s, nhóm có kết quả 
 
 ---
 
-
+### 📈 Kết luận
+Dự án đã đạt được mục tiêu ban đầu về xây dựng service rút gọn URL với hiệu năng cao và ổn định. Các cải tiến về kiến trúc và công nghệ đã giúp service có thể xử lý tải lớn, dễ mở rộng và bảo trì. Kết quả test hiệu năng cho thấy cải thiện đáng kể về thời gian phản hồi và độ tin cậy của hệ thống.
 
 
 
