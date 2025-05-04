@@ -1,3 +1,7 @@
+# Nhóm 18:
+Thành viên trong nhóm:
+22026552 Nguyễn Văn Quân
+22026507 Mai Tiến Mạnh
 # ShortURL Service
 
 ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu hóa để xử lý nhanh chóng các yêu cầu thông qua cơ sở dữ liệu MongoDB, bộ nhớ đệm Redis, và hỗ trợ giới hạn tốc độ (Rate Limiting) để bảo mật.
@@ -62,7 +66,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 - **Request:**  
   - Query string: `url` (bắt buộc)
 - **Response:**  
-  - Thành công (201):  
+  - Thành công (200):  
     ```json
     "abc12"
     ```
@@ -108,7 +112,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 - **Express.js**: Framework backend chính.
 - **MongoDB**: Lưu trữ cặp (id, url).
 - **Redis**: Cache 2 chiều (id <-> url) để tăng tốc truy xuất.
-- **Mongoose**: ORM cho MongoDB.
+- **Mongoose**: ODM cho MongoDB.
 - **Rate Limiter**: Sử dụng `rate-limiter-flexible` với Redis để giới hạn 100 request/10 giây mỗi IP.
 - **Retry Pattern**: Dùng `async-retry` để tự động thử lại thao tác DB/Redis khi gặp lỗi tạm thời (3 lần, delay 1-5s).
 
@@ -162,16 +166,16 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 
 ## Một số tối ưu & lưu ý
 
-### 1. **Chuyển từ SQLite sang MongoDB với ORM (Mongoose)**
+### 1. **Chuyển từ SQLite sang MongoDB với ODM (Mongoose)**
 - Ban đầu nhóm có cải tiến bằng việc sử dụng thư viện Sequelize để định nghĩa Schema cho model Link.
 - Sử dụng ORM để viết hai hàm findOriginORM và createORM trong [branch dev-v0.1 và trong file utils](https://github.com/manhtienmai/Short_Link/blob/dev-v0.1/utils.js).
 
-- Tuy nhiên, do SQLite có hạn chế trong việc xử lý nhiều kết nối đồng thời, dẫn đến hiện tượng nghẽn cổ chai khi truy cập dữ liệu song song, nhóm đã đề xuất chuyển sang sử dụng MongoDB làm cơ sở dữ liệu chính và xây dựng lại lớp persistent layer sử dụng ORM Mongoose.
+- Tuy nhiên, do SQLite có hạn chế trong việc xử lý nhiều kết nối đồng thời, dẫn đến hiện tượng nghẽn cổ chai khi truy cập dữ liệu song song, nhóm đã đề xuất chuyển sang sử dụng MongoDB làm cơ sở dữ liệu chính và xây dựng lại lớp persistent layer sử dụng ODM Mongoose.
 
 - **Ưu điểm:**
   - **Khả năng mở rộng cao:** MongoDB là NoSQL, phù hợp cho dữ liệu lớn, dễ scale horizontal.
   - **Tối ưu truy vấn:** Truy vấn nhanh hơn, hỗ trợ index tốt cho các trường thường xuyên tìm kiếm (id, url).
-  - **ORM Mongoose:** Định nghĩa schema rõ ràng, tự động validate, dễ bảo trì và mở rộng model.
+  - **ODM Mongoose:** Định nghĩa schema rõ ràng, tự động validate, dễ bảo trì và mở rộng model.
 - **Chi tiết code:**  
   - Định nghĩa schema và model trong `optimizer/mongoDBConfig.js`.
   - Kết nối MongoDB qua biến môi trường, log trạng thái kết nối.
