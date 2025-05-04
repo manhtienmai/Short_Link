@@ -156,6 +156,11 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 ## Một số tối ưu & lưu ý
 
 ### 1. **Chuyển từ SQLite sang MongoDB với ORM (Mongoose)**
+- Ban đầu nhóm có cải tiến bằng việc sử dụng thư viện Sequelize để định nghĩa Schema cho model Link.
+- Sử dụng ORM để viết hai hàm findOriginORM và createORM trong [branch dev-v0.1 và trong file utils](https://github.com/ngoctuannguyen/KTPM-architecture-solution/blob/main/CS1/utils.js).
+
+-Tuy nhiên, do SQLite có hạn chế trong việc xử lý nhiều kết nối đồng thời, dẫn đến hiện tượng nghẽn cổ chai khi truy cập dữ liệu song song, nhóm đã đề xuất chuyển sang sử dụng MongoDB làm cơ sở dữ liệu chính và xây dựng lại lớp persistent layer sử dụng ORM Mongoose.
+
 - **Ưu điểm:**
   - **Khả năng mở rộng cao:** MongoDB là NoSQL, phù hợp cho dữ liệu lớn, dễ scale horizontal.
   - **Tối ưu truy vấn:** Truy vấn nhanh hơn, hỗ trợ index tốt cho các trường thường xuyên tìm kiếm (id, url).
@@ -167,6 +172,20 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 ---
 
 ### 2. **Thêm Redis Cache (Cache-Aside Pattern)**
+  <p>
+    <img src="res/cache.png" width="auto" height="auto" />
+   </p>
+
+ - **Công nghệ sử dụng**: Redis
+ 
+ - **Cơ chế**: 
+      - **Read-Through** (Đọc dữ liệu):
+      Khi ứng dụng cần một dữ liệu, nó sẽ kiểm tra xem dữ liệu đã có trong cache chưa.
+      Nếu có (cache hit), trả về dữ liệu từ cache.
+      Nếu không có (cache miss), ứng dụng sẽ lấy dữ liệu từ nguồn dữ liệu chính (database), lưu vào cache, và sau đó trả về dữ liệu cho client.
+
+     - **Write-Through** (Ghi dữ liệu):
+      Khi dữ liệu được cập nhật, ứng dụng sẽ cập nhật trực tiếp vào cơ sở dữ liệu và có thể cập nhật thủ công vào cache (hoặc để dữ liệu cũ trong cache hết hạn tự động).
 - **Ưu điểm:**
   - **Tăng tốc truy xuất:** Lấy dữ liệu từ Redis nhanh hơn nhiều so với DB.
   - **Giảm tải cho MongoDB:** Truy vấn cache trước, chỉ truy vấn DB khi cache miss.
@@ -192,7 +211,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 ### 4. **Rate Limiting (Giới hạn tốc độ)**
 - **Ưu điểm:**
   - **Bảo vệ API:** Ngăn chặn spam, tấn công DDoS, lạm dụng dịch vụ.
-  - **Công bằng cho người dùng:** Mỗi IP chỉ được phép gửi tối đa 20 request/phút.
+  - **Công bằng cho người dùng:** Mỗi IP chỉ được phép gửi tối đa 100 request/10 giây.
   - **Dễ mở rộng:** Sử dụng Redis làm backend, phù hợp cho hệ thống nhiều node.
 - **Chi tiết code:**  
   - Middleware `rateLimit` trong `middleware.js` sử dụng `rate-limiter-flexible` với Redis.
@@ -232,12 +251,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 
 ---
 
-### 8. **Tách biệt rõ ràng các lớp logic**
-- **Ưu điểm:**
-  - **Dễ bảo trì, mở rộng:** Phân chia rõ ràng các file: route, logic, middleware, config, cache, retry.
-  - **Dễ test, dễ refactor:** Mỗi thành phần đảm nhiệm một nhiệm vụ rõ ràng.
 
----
 
 ## Test hiệu năng
 
@@ -271,9 +285,31 @@ artillery report --output report.html report.json
 
 ### 📊 Kết quả kiếm thử
 
-#### Get
+Sau khi thực hiện test với 30000 request trong 60s, nhóm có kết quả như sau:
 
+<b>1. Kết quả khi sử dụng phần code được cung cấp</b>
+- GET:
+<p>
+    <img src="res/Get-before.png" width="auto" height="auto" />
+</p>
 
+- POST: 
+
+<p>
+    <img src="res/Post-before.png" width="auto" height="auto" />
+</p>
+
+<b>2. Kết quả khi đã thực hiện tối ưu code và kiến trúc</b>
+- GET: 
+<p>
+    <img src="res/Get-after.png" width="auto" height="auto" />
+</p>
+
+- POST: 
+
+<p>
+    <img src="res/Get-after.png" width="auto" height="auto" />
+</p>
 
 
 # 📊 Đánh giá kết quả
