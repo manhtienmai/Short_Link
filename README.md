@@ -30,7 +30,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 
 1. **Clone repository:**
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/manhtienmai/Short_Link.git
    cd Short_Link
    ```
 
@@ -74,7 +74,10 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
     ```json
     { "error": "invalid url format" }
     ```
-
+  - Vượt quá giới hạn request (429):
+    ```json
+    { "error": "Too Many Requests" }
+    ```
 ### 2. Lấy URL gốc từ short ID
 
 - **Endpoint:** `GET /short/:id`
@@ -86,6 +89,10 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
   - Không tìm thấy (404):  
     ```html
     <h1>404 Not Found</h1>
+    ```
+  - Vượt quá giới hạn request (429):
+    ```json
+    { "error": "Too Many Requests" }
     ```
 
 ### 3. Giao diện web
@@ -102,7 +109,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 - **MongoDB**: Lưu trữ cặp (id, url).
 - **Redis**: Cache 2 chiều (id <-> url) để tăng tốc truy xuất.
 - **Mongoose**: ORM cho MongoDB.
-- **Rate Limiter**: Sử dụng `rate-limiter-flexible` với Redis để giới hạn 20 request/phút mỗi IP.
+- **Rate Limiter**: Sử dụng `rate-limiter-flexible` với Redis để giới hạn 100 request/10 giây mỗi IP.
 - **Retry Pattern**: Dùng `async-retry` để tự động thử lại thao tác DB/Redis khi gặp lỗi tạm thời (3 lần, delay 1-5s).
 
 ### 2. **Luồng xử lý chính**
@@ -121,7 +128,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 
 #### c. **Rate Limiting**
 - Middleware kiểm tra số lượng request từ mỗi IP.
-- Nếu vượt quá 20 request/60s, trả về 429.
+- Nếu vượt quá 100 request/10s, trả về 429.
 
 #### d. **Retry Pattern**
 - Các thao tác DB/Redis được bọc bởi `callWithRetry` (tối đa 3 lần thử lại nếu lỗi).

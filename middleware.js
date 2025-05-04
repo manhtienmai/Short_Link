@@ -14,7 +14,7 @@ const rateLimiter = new RateLimiterRedis({
     keyPrefix: "rate_limit",
     points: 100,         // Cho phép 100 requests
     duration: 10,        // Trong mỗi 10 giây
-    blockDuration: 30    // Nếu vượt quá, chặn trong 30 giây
+    blockDuration: 10    // Nếu vượt quá, chặn trong 10 giây
   });
 //   const rateLimiter = new RateLimiterRedis({
 //     storeClient: redisClient,

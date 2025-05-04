@@ -2,7 +2,7 @@ config:
   target: "http://localhost:3000"
   phases:
     - duration: 60         # test 60 giây
-      arrivalRate: 500       # 10 request mỗi giây
+      arrivalRate: 500       # 500 request mỗi giây
 
 scenarios:
   # - name: "Test POST /create"
