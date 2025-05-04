@@ -1,17 +1,9 @@
 config:
-  target: "http://localhost:3000"
+  target: "http://localhost:3001"
   phases:
     - duration: 60         # test 60 giây
-      arrivalRate: 500       # 500 request mỗi giây
-
-scenarios:
-  - name: "Test POST /create"
-    flow:
-      - post:
-          url: "/create?url=https://example.com/{{ $randomString() }}"
-          expect:
-            - statusCode: 201
-
+      arrivalRate: 500       # 500 request mỗi giây 
+scenarios:  
   - name: "Test GET /short/:id"
     flow:
       - post:

@@ -278,17 +278,15 @@ config:
 ### ▶️ Lệnh chạy test
 
 ```bash
-artillery run --output report.json test-api.yml
+artillery run --output report.json test-api-get.yml
+artillery run --output report.json test-api-post.yml
+
 ```
 
 ### 📂 Xem kết quả
 
 * File kết quả: `report.json`
-* Có thể chuyển sang báo cáo HTML để xem biểu đồ:
 
-```bash
-artillery report --output report.html report.json
-```
 
 ### 📊 Kết quả kiếm thử
 
