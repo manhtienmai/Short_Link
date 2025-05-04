@@ -1,0 +1,25 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60         # test 60 giây
+      arrivalRate: 500       # 10 request mỗi giây
+
+scenarios:
+  # - name: "Test POST /create"
+  #   flow:
+  #     - post:
+  #         url: "/create?url=https://example.com/helololjj"
+  #         # expect:
+  #         #   - statusCode: 201
+
+  - name: "Test GET /short/:id"
+    flow:
+      # - post:
+      #     url: "/create?url=https://example.com/{{ $randomString() }}"
+      #     capture:
+      #       - json: "$"
+      #         as: "shortId"
+      - get:
+          url: "/short/wJ7AE"
+          expect:
+            - statusCode: 200

@@ -2,12 +2,26 @@ import { RateLimiterRedis } from "rate-limiter-flexible";
 import { redisClient } from "./optimizer/redisConfig.js"; 
 
 // Cấu hình rate limiter
-const rateLimiter = new RateLimiterRedis({
+// const rateLimiter = new RateLimiterRedis({
+//     storeClient: redisClient,
+//     keyPrefix: "rate_limit",
+//     points: 20, // Tối đa 20 requests mỗi 60 giây
+//     duration: 60,
+//     blockDuration: 60, // Chặn trong 1 phút nếu vượt quá
+//   });
+// const rateLimiter = new RateLimiterRedis({
+//     storeClient: redisClient,
+//     keyPrefix: "rate_limit",
+//     points: 100,         // Cho phép 100 requests
+//     duration: 10,        // Trong mỗi 10 giây
+//     blockDuration: 30    // Nếu vượt quá, chặn trong 30 giây
+//   });
+  const rateLimiter = new RateLimiterRedis({
     storeClient: redisClient,
     keyPrefix: "rate_limit",
-    points: 20, // Tối đa 10 requests mỗi 60 giây
-    duration: 60,
-    blockDuration: 60, // Chặn trong 1 phút nếu vượt quá
+    points: 1000,        // Tăng số request được phép
+    duration: 10,        // Trong 10 giây
+    blockDuration: 2     // Chỉ chặn 2 giây khi vi phạm (giảm từ 30s)
   });
   
   // Middleware rate limiting

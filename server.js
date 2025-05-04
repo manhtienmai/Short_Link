@@ -12,7 +12,7 @@ const app = express()
 const port = 3001;
 app.use(express.json());
 app.use(cors());
-app.use(middleware.logger); // ghi log moi request
+// app.use(middleware.logger); // ghi log moi request
 app.use(middleware.validateUrl);
 app.use(middleware.rateLimit);
 
@@ -25,11 +25,10 @@ app.get('/short/:id', async (req, res, next) => {
         const id = req.params.id;
         const url = await callWithRetry(() => lib.findOrigin(id));
         if (url == null) {
-            res.send("<h1>404</h1>");
-        }
-        else {
-            res.send(url);
-        }
+            res.status(404).send("<h1>404 Not Found</h1>");
+          } else {
+            res.status(200).send(url);
+          }
     } catch (err) {
         next(err); // chuyen loi cho error handler
     }
@@ -39,7 +38,7 @@ app.post('/create', async (req, res, next) => {
     try {
         const url = req.query.url;
         const newID = await callWithRetry(() => lib.shortUrl(url));
-        res.send(newID);
+        res.status(201).send(newID);
     } catch (err) {
         next(err);
     }

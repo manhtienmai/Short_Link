@@ -18,7 +18,8 @@ async function redisConnection() {
 redisConnection();
 
 // Đã tối ưu:
-// - Thay vì dùng Math.random(), sử dụng crypto.randomBytes() để sinh số ngẫu nhiên an toàn về mặt mật mã (CSPRNG)
+// - Thay vì dùng Math.random() Dễ dự đoán: vì nó dựa vào thuật toán có seed nội bộ – nếu kẻ tấn công đoán/biết seed → có thể dự đoán các giá trị sau đó,
+//  sử dụng crypto.randomBytes() để sinh số ngẫu nhiên an toàn về mặt mật mã (CSPRNG)
 // - Tránh vòng lặp thủ công: dùng Array.from để chuyển byte thành ký tự tương ứng hiệu quả hơn
 // - Giảm xác suất trùng ID và tăng bảo mật (không thể đoán ID kế tiếp)
 
@@ -88,12 +89,15 @@ async function shortUrl(url) {
     // Kiểm tra trong Redis cache
     const cachedId = await getCache(url);
     if (cachedId) {
+        // console.log("cacheID: " + cachedId);
         return cachedId;
     }
+    // console.log("NO cache")
 
     // Kiểm tra trong MongoDB nếu chưa có trong Redis
     const existingEntry = await Url.findOne({ url });
     if (existingEntry) {
+        // console.log("Has in db")
         // Cache 2 chiều
         await Promise.all([
             setCache(existingEntry.id, url),
