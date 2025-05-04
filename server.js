@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cors());
 // app.use(middleware.logger); // ghi log moi request
 app.use(middleware.validateUrl);
-app.use(middleware.rateLimit);
+// app.use(middleware.rateLimit);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,7 +23,7 @@ app.use(express.static(join(__dirname, 'public')));
 app.get('/short/:id', async (req, res, next) => {
     try {
         const id = req.params.id;
-        const url = await callWithRetry(() => lib.findOrigin(id));
+        const url = await callWithRetry(() => lib.findOriginORM(id));
         if (url == null) {
             res.status(404).send("<h1>404 Not Found</h1>");
           } else {
