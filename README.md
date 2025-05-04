@@ -166,7 +166,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 - Ban đầu nhóm có cải tiến bằng việc sử dụng thư viện Sequelize để định nghĩa Schema cho model Link.
 - Sử dụng ORM để viết hai hàm findOriginORM và createORM trong [branch dev-v0.1 và trong file utils](https://github.com/manhtienmai/Short_Link/blob/dev-v0.1/utils.js).
 
--Tuy nhiên, do SQLite có hạn chế trong việc xử lý nhiều kết nối đồng thời, dẫn đến hiện tượng nghẽn cổ chai khi truy cập dữ liệu song song, nhóm đã đề xuất chuyển sang sử dụng MongoDB làm cơ sở dữ liệu chính và xây dựng lại lớp persistent layer sử dụng ORM Mongoose.
+- Tuy nhiên, do SQLite có hạn chế trong việc xử lý nhiều kết nối đồng thời, dẫn đến hiện tượng nghẽn cổ chai khi truy cập dữ liệu song song, nhóm đã đề xuất chuyển sang sử dụng MongoDB làm cơ sở dữ liệu chính và xây dựng lại lớp persistent layer sử dụng ORM Mongoose.
 
 - **Ưu điểm:**
   - **Khả năng mở rộng cao:** MongoDB là NoSQL, phù hợp cho dữ liệu lớn, dễ scale horizontal.
@@ -278,14 +278,14 @@ config:
 ### ▶️ Lệnh chạy test
 
 ```bash
-artillery run --output report.json test-api-get.yml
-artillery run --output report.json test-api-post.yml
+artillery run --output report-get.json test-api-get.yml
+artillery run --output report-post.json test-api-post.yml
 
 ```
 
 ### 📂 Xem kết quả
 
-* File kết quả: `report.json`
+* File kết quả: `report-get.json` `report-post.json`
 
 
 ### 📊 Kết quả kiếm thử
