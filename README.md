@@ -1,7 +1,7 @@
 # Nhóm 18:
 Thành viên trong nhóm:
-22026552 Nguyễn Văn Quân
-22026507 Mai Tiến Mạnh
+- 22026552 Nguyễn Văn Quân
+- 22026507 Mai Tiến Mạnh
 # ShortURL Service
 
 ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu hóa để xử lý nhanh chóng các yêu cầu thông qua cơ sở dữ liệu MongoDB, bộ nhớ đệm Redis, và hỗ trợ giới hạn tốc độ (Rate Limiting) để bảo mật.
