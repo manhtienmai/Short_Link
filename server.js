@@ -12,7 +12,7 @@ const app = express()
 const port = 3001;
 app.use(express.json());
 app.use(cors());
-// app.use(middleware.logger); // ghi log moi request
+app.use(middleware.logger); // ghi log moi request
 app.use(middleware.validateUrl);
 app.use(middleware.rateLimit);
 

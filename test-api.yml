@@ -5,21 +5,21 @@ config:
       arrivalRate: 500       # 500 request mỗi giây
 
 scenarios:
-  # - name: "Test POST /create"
-  #   flow:
-  #     - post:
-  #         url: "/create?url=https://example.com/helololjj"
-  #         # expect:
-  #         #   - statusCode: 201
+  - name: "Test POST /create"
+    flow:
+      - post:
+          url: "/create?url=https://example.com/{{ $randomString() }}"
+          expect:
+            - statusCode: 201
 
   - name: "Test GET /short/:id"
     flow:
-      # - post:
-      #     url: "/create?url=https://example.com/{{ $randomString() }}"
-      #     capture:
-      #       - json: "$"
-      #         as: "shortId"
+      - post:
+          url: "/create?url=https://example.com/{{ $randomString() }}"
+          capture:
+            - json: "$"
+              as: "shortId"
       - get:
-          url: "/short/wJ7AE"
+          url: "/short/shortId"
           expect:
             - statusCode: 200

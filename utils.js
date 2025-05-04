@@ -53,16 +53,6 @@ async function findOrigin(id) {
     }
 }
 
-// Cache aside
-// Tối ưu bằng cách sử dụng cache 2 chiều và Promise.all để chạy song song các tác vụ bất đồng bộ.
-// 1. **Cache 2 chiều**:
-//    - Khi tìm URL theo ID, nếu có kết quả thì lưu ID vào cache với key là URL.
-//    - Khi tìm URL theo ID, nếu không có kết quả, sẽ lưu URL với key là ID trong cache.
-//    - Điều này giúp đảm bảo việc tìm kiếm 2 chiều trong cả hai hướng (ID -> URL và URL -> ID) giúp tối ưu hiệu suất khi truy xuất lại sau này.
-// 2. **Promise.all**:
-//    - Thay vì chờ từng lệnh `setCache` tuần tự (lệnh thứ hai chỉ thực thi sau khi lệnh đầu tiên hoàn tất),
-//      `Promise.all` cho phép cả hai lệnh `setCache` chạy song song đồng thời, giúp giảm thời gian chờ đợi, từ đó cải thiện hiệu suất tổng thể.
-//    - Việc này hữu ích khi cần lưu vào cache cho cả hai chiều (ID <-> URL) cùng lúc mà không làm gián đoạn các tác vụ khác.
 async function create(id, url) {
     try {
         if (!isValidUrl(url)){
