@@ -1,6 +1,7 @@
 import { Url } from './optimizer/mongoDBConfig.js';
 import { connectRedis, getCache, setCache } from "./optimizer/redisConfig.js";
 import { randomBytes } from 'crypto';
+import {getFromMemory, setInMemory} from "./optimizer/memoryCache.js";
 
 function isValidUrl(url) {
     return /^https?:\/\//.test(url); // Chỉ kiểm tra các URL bắt đầu với http:// hoặc https://
@@ -33,21 +34,35 @@ function makeID(length) {
 
 async function findOrigin(id) {
     try {
-        let cachedUrl = await getCache(id);
-        if (cachedUrl) {
-            return cachedUrl;
+
+        // tier 1: check in-memory cache
+        const memoryResult = getFromMemory(id);
+        if (memoryResult) {
+            return memoryResult;
         }
-        // Nếu không có trong Redis, truy vấn MongoDB
+
+        // tier 2: check redis cache
+        const redisResult = await getCache(id);
+        if (redisResult) {
+            setInMemory(id, redisResult)
+            return redisResult;
+        }
+
+        // tier 3: Nếu không có trong Redis, truy vấn MongoDB
         const doc = await Url.findOne({ id });
         if (!doc) return null;
-        cachedUrl = doc.url;
+        const url = doc.url;
 
-        // Lưu vào Redis cache
+        // Lưu vào tat ca cache tier
         await Promise.all([
-            setCache(id, doc.url),
-            setCache(doc.url, id)
+            setCache(id, url),
+            setCache(url, id)
         ]);
-        return cachedUrl;
+
+        setInMemory(id, url);
+        setInMemory(url, id);
+
+        return url;
     } catch (error) {
         throw new Error(`Error finding url:  ${error.message}`);
     }
@@ -67,7 +82,9 @@ async function create(id, url) {
             setCache(id, url),
             setCache(url, id)
         ]);
-        
+
+        setInMemory(id, url);
+        setInMemory(url, id);
 
         return id;
     } catch (error) {
@@ -76,23 +93,33 @@ async function create(id, url) {
 }
 
 async function shortUrl(url) {
+    //check memory cache
+    const memoryCachedId = getFromMemory(url);
+    if (memoryCachedId) {
+        return memoryCachedId;
+    }
+
     // Kiểm tra trong Redis cache
     const cachedId = await getCache(url);
     if (cachedId) {
-        // console.log("cacheID: " + cachedId);
+        setInMemory(url, cachedId);
+        setInMemory(cachedId, url);
+
         return cachedId;
     }
-    // console.log("NO cache")
 
     // Kiểm tra trong MongoDB nếu chưa có trong Redis
     const existingEntry = await Url.findOne({ url });
     if (existingEntry) {
-        // console.log("Has in db")
         // Cache 2 chiều
         await Promise.all([
             setCache(existingEntry.id, url),
             setCache(url, existingEntry.id)
         ]);
+
+        setInMemory(existingEntry.id, url);
+        setInMemory(url, existingEntry.id);
+
         return existingEntry.id;
     }
 
@@ -102,6 +129,8 @@ async function shortUrl(url) {
         const newID = makeID(5);
 
         // Ưu tiên kiểm tra cache trước để tiết kiệm thời gian
+        if (getFromMemory(newId)) continue;
+
         const cachedOrigin = await getCache(newID);
         if (cachedOrigin) continue;
 
@@ -114,7 +143,7 @@ async function shortUrl(url) {
         return newID;
     }
 
-    throw new Error("Failed to generate a unique short URL after multiple attempts.");
+    throw new Error("Failed to generate a unique short URL.");
 }
 
 export { findOrigin, shortUrl };

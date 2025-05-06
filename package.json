@@ -20,6 +20,7 @@
     "dotenv": "^16.5.0",
     "express": "^4.21.0",
     "mongoose": "^8.14.0",
+    "node-cache": "^5.1.2",
     "rate-limiter-flexible": "^7.1.0",
     "redis": "^4.7.0",
     "sequelize": "^6.37.7",
