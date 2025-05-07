@@ -156,12 +156,6 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 │   └── memoryCache.js       # Thiết lập các hàm liên quan in-memory
 
 ├── public/                  # Giao diện web (index.html, script.js, styles.css)
-├── db/                      # (Có thể chứa file SQLite cũ, không còn dùng)
-├── res/
-│   └── cache.png            # Minh họa cache-aside
-├── test-api.yml             # Kịch bản test hiệu năng với Artillery
-├── package.json
-└── README.md
 ```
 
 ---
