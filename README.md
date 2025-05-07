@@ -116,6 +116,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 - **Rate Limiter**: Sử dụng `rate-limiter-flexible` với Redis để giới hạn 100 request/10 giây mỗi IP.
 - **Retry Pattern**: Dùng `async-retry` để tự động thử lại thao tác DB/Redis khi gặp lỗi tạm thời (3 lần, delay 1-5s).
 
+
 ### 2. **Luồng xử lý chính**
 
 #### a. Tạo short URL (`POST /create`)
@@ -139,14 +140,8 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 vi
 #### e. **Cache Aside**
 - Khi truy xuất, ưu tiên lấy từ cache, nếu không có thì lấy từ DB rồi lưu vào cache.
-
----
-### f. **Cơ chế caching đa tầng**
-- Ứng dụng sử dụng cache đa tầng để tối ưu hiệu năng và giảm tải cho cơ sở dữ liệu
-- Các tầng cache:
-  - Memory Cache (Tier 1): cache nhanh nhất, lưu trữ trực tiếp trong bộ nhớ của Node.js
-  - Redis cache (Tier 2)
-  - MongoDB (Tier 3): lưu trữ dài hạn
+ 
+----
 ## Cấu trúc thư mục
 
 ```
@@ -188,33 +183,53 @@ vi
   - Kết nối MongoDB qua biến môi trường, log trạng thái kết nối.
 
 ---
-
-### 2. **Thêm Redis Cache (Cache-Aside Pattern)**
+### 2. **Multi-Tier Caching Architecture**
   <p>
     <img src="res/cache.png" width="auto" height="auto" />
    </p>
 
- - **Công nghệ sử dụng**: Redis
+ - **Công nghệ sử dụng**: Node-Cache (Memory), Redis, MongoDB
  
- - **Cơ chế**: 
+ - **Cơ chế Cache đa tầng**: 
+      - **Tier 1 - Memory Cache (Node-Cache)**:
+        - Cache nhanh nhất, lưu trữ trực tiếp trong bộ nhớ của Node.js
+        - TTL mặc định: 60 giây
+        - Kiểm tra và dọn dẹp cache mỗi 120 giây
+        - Ưu tiên kiểm tra đầu tiên khi có request
+
+      - **Tier 2 - Redis Cache**:
+        - Cache phân tán, có thể chia sẻ giữa nhiều instance
+        - TTL mặc định: 3600 giây (1 giờ)
+        - Được kiểm tra nếu không tìm thấy trong Memory Cache
+
+      - **Tier 3 - MongoDB**:
+        - Lưu trữ dài hạn, nguồn dữ liệu chính
+        - Được truy vấn khi không tìm thấy trong cả Memory và Redis Cache
+
+ - **Cơ chế hoạt động**: 
       - **Read-Through** (Đọc dữ liệu):
-      Khi ứng dụng cần một dữ liệu, nó sẽ kiểm tra xem dữ liệu đã có trong cache chưa.
-      Nếu có (cache hit), trả về dữ liệu từ cache.
-      Nếu không có (cache miss), ứng dụng sẽ lấy dữ liệu từ nguồn dữ liệu chính (database), lưu vào cache, và sau đó trả về dữ liệu cho client.
+        - Kiểm tra lần lượt từ Tier 1 → Tier 2 → Tier 3
+        - Khi tìm thấy ở tier thấp hơn, tự động cập nhật lên các tier cao hơn
+        - Ví dụ: Nếu tìm thấy ở Redis, sẽ cập nhật vào Memory Cache
 
-     - **Write-Through** (Ghi dữ liệu):
-      Khi dữ liệu được cập nhật, ứng dụng sẽ cập nhật trực tiếp vào cơ sở dữ liệu và có thể cập nhật thủ công vào cache (hoặc để dữ liệu cũ trong cache hết hạn tự động).
+      - **Write-Through** (Ghi dữ liệu):
+        - Cập nhật đồng thời vào tất cả các tier
+        - Sử dụng Promise.all để cập nhật song song Redis và Memory Cache
+        - Đảm bảo tính nhất quán dữ liệu giữa các tier
+
 - **Ưu điểm:**
-  - **Tăng tốc truy xuất:** Lấy dữ liệu từ Redis nhanh hơn nhiều so với DB.
-  - **Giảm tải cho MongoDB:** Truy vấn cache trước, chỉ truy vấn DB khi cache miss.
-  - **Cache 2 chiều:** Lưu cả id→url và url→id, tối ưu lookup cả hai chiều.
-  - **Tự động hết hạn:** Dữ liệu cache có TTL, giảm nguy cơ dữ liệu cũ không nhất quán.
-- **Chi tiết code:**  
-  - Kết nối và thao tác cache trong `optimizer/redisConfig.js`.
-  - Sử dụng Promise.all để ghi cache song song, tăng hiệu suất.
-  - Áp dụng cache-aside trong các hàm `findOrigin`, `shortUrl` (`utils.js`).
+  - **Hiệu năng tối ưu:** Memory Cache cho response nhanh nhất, Redis cho phân tán, MongoDB cho lưu trữ
+  - **Giảm tải cho DB:** Hầu hết request được phục vụ từ cache
+  - **Khả năng mở rộng:** Dễ dàng thêm/sửa/xóa các tier cache
+  - **Độ tin cậy cao:** Nhiều lớp bảo vệ, tự động đồng bộ giữa các tier
+  - **Cache 2 chiều:** Lưu cả id→url và url→id ở mỗi tier
 
----
+- **Chi tiết code:**  
+  - Memory Cache: `optimizer/memoryCache.js` sử dụng Node-Cache
+  - Redis Cache: `optimizer/redisConfig.js` quản lý kết nối và thao tác Redis
+  - Logic cache: `utils.js` triển khai cơ chế đa tầng trong các hàm `findOrigin`, `shortUrl`
+
+
 
 ### 3. **Kiểm tra URL hợp lệ trước khi tạo short URL**
 - **Ưu điểm:**
@@ -224,7 +239,7 @@ vi
   - Middleware `validateUrl` trong `middleware.js` kiểm tra query `url` và validate định dạng.
   - Hàm `isValidUrl` trong `utils.js` kiểm tra tiền tố `http://` hoặc `https://`.
 
----
+
 
 ### 4. **Rate Limiting (Giới hạn tốc độ)**
 - **Ưu điểm:**
@@ -341,16 +356,13 @@ Sau khi thực hiện test với 30000 request trong 60s, nhóm có kết quả 
 | **http.downloaded\_bytes**      | 177 792 bytes      | 638 929 bytes    | Cache Redis trả nhanh nội dung → lượng dữ liệu tải tăng gấp \~3,6×.                             |
 | **http.response\_time.mean**    | 1 329,8 ms         | 13,4 ms          | Hầu hết request được phục vụ từ Redis hoặc Mongo nhanh; SQLite I/O bị loại bỏ.                  |
 | **http.response\_time.median**  | 1 300,1 ms         | 4 ms             | Median giảm mạnh nhờ cache hit cao.                                                             |
-| **http.response\_time.p95**     | 1 790,4 ms         | 39,3 ms          | 95% request nhanh nhờ cache, tuy có vài fallback sang Mongo/chờ retry.                          |
-| **http.response\_time.p99**     | 1 978,7 ms         | 194,4 ms         | Top 1% chậm do retry timeout, truy vấn Mongo hoặc rate-limiter queue.                           |
 | **http.codes.200**              | 14 816             | 8 561            | Nhiều request bị rate-limit → trả 429.                                                          |
 | **http.codes.429**              | 0                  | 7 660            | Rate-limiter chủ động trả 429 khi vượt ngưỡng.                                                  |
 | **http.responses**              | 14 816             | 16 221           | Tổng responses tăng (bao gồm cả 429).                                                           |
 | **vusers.completed**            | 14 816             | 16 221           | Retry + cache giúp nhiều virtual user hoàn thành hơn.                                           |
 | **vusers.failed**               | 15 184             | 13 672           | Giảm 1 500 failures nhờ retry & cache giảm tải DB.                                              |
 | **vusers.session\_length.mean** | 3 085 ms           | 84,5 ms          | Session ngắn hơn nhiều do response time giảm sâu.                                               |
-| **vusers.session\_length.p95**  | 8 692,8 ms         | 62,2 ms          | 95% session dưới 63 ms, cải thiện hơn 100×.                                                     |
-| **vusers.session\_length.p99**  | 9 047,6 ms         | 2 416,8 ms       | 1% chậm nhất do tail latency và retry chậm.                                                     |
+
 
 ---
 
