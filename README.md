@@ -132,7 +132,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 
 #### c. **Rate Limiting**
 - Middleware kiểm tra số lượng request từ mỗi IP.
-- Nếu vượt quá 100 request/10s, trả về 429.
+- Nếu vượt quá 1000 request/10s, trả về 429.
 
 #### d. **Retry Pattern**
 - Các thao tác DB/Redis được bọc bởi `callWithRetry` (tối đa 3 lần thử lại nếu lỗi).
@@ -222,7 +222,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 ### 4. **Rate Limiting (Giới hạn tốc độ)**
 - **Ưu điểm:**
   - **Bảo vệ API:** Ngăn chặn spam, tấn công DDoS, lạm dụng dịch vụ.
-  - **Công bằng cho người dùng:** Mỗi IP chỉ được phép gửi tối đa 100 request/10 giây.
+  - **Công bằng cho người dùng:** Mỗi IP chỉ được phép gửi tối đa 1000 request/10 giây.
   - **Dễ mở rộng:** Sử dụng Redis làm backend, phù hợp cho hệ thống nhiều node.
 - **Chi tiết code:**  
   - Middleware `rateLimit` trong `middleware.js` sử dụng `rate-limiter-flexible` với Redis.

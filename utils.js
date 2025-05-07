@@ -129,7 +129,7 @@ async function shortUrl(url) {
         const newID = makeID(5);
 
         // Ưu tiên kiểm tra cache trước để tiết kiệm thời gian
-        if (getFromMemory(newId)) continue;
+        if (getFromMemory(newID)) continue;
 
         const cachedOrigin = await getCache(newID);
         if (cachedOrigin) continue;
