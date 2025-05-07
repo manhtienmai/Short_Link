@@ -66,7 +66,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 - **Request:**  
   - Query string: `url` (bắt buộc)
 - **Response:**  
-  - Thành công (200):  
+  - Thành công (201):  
     ```json
     "abc12"
     ```
@@ -137,7 +137,7 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 
 #### d. **Retry Pattern**
 - Các thao tác DB/Redis được bọc bởi `callWithRetry` (tối đa 3 lần thử lại nếu lỗi).
-vi
+
 #### e. **Cache Aside**
 - Khi truy xuất, ưu tiên lấy từ cache, nếu không có thì lấy từ DB rồi lưu vào cache.
  
