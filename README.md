@@ -136,12 +136,17 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 
 #### d. **Retry Pattern**
 - Các thao tác DB/Redis được bọc bởi `callWithRetry` (tối đa 3 lần thử lại nếu lỗi).
-
+vi
 #### e. **Cache Aside**
 - Khi truy xuất, ưu tiên lấy từ cache, nếu không có thì lấy từ DB rồi lưu vào cache.
 
 ---
-
+### f. **Cơ chế caching đa tầng**
+- Ứng dụng sử dụng cache đa tầng để tối ưu hiệu năng và giảm tải cho cơ sở dữ liệu
+- Các tầng cache:
+  - Memory Cache (Tier 1): cache nhanh nhất, lưu trữ trực tiếp trong bộ nhớ của Node.js
+  - Redis cache (Tier 2)
+  - MongoDB (Tier 3): lưu trữ dài hạn
 ## Cấu trúc thư mục
 
 ```
@@ -153,6 +158,8 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 │   ├── mongoDBConfig.js     # Kết nối và định nghĩa model MongoDB
 │   ├── redisConfig.js       # Kết nối và thao tác với Redis
 │   └── retryHelper.js       # Hàm retry pattern
+│   └── memoryCache.js       # Thiết lập các hàm liên quan in-memory
+
 ├── public/                  # Giao diện web (index.html, script.js, styles.css)
 ├── db/                      # (Có thể chứa file SQLite cũ, không còn dùng)
 ├── res/
