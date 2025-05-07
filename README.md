@@ -111,9 +111,9 @@ ShortURL Service là một ứng dụng rút gọn URL hiệu quả, tối ưu h
 ### 1. **Kiến trúc tổng quan**
 - **Express.js**: Framework backend chính.
 - **MongoDB**: Lưu trữ cặp (id, url).
-- **Redis**: Cache 2 chiều (id <-> url) để tăng tốc truy xuất.
+- **Cache Aside**: Dùng Node-Cache và Redis tạo các tầng cache.
 - **Mongoose**: ODM cho MongoDB.
-- **Rate Limiter**: Sử dụng `rate-limiter-flexible` với Redis để giới hạn 100 request/10 giây mỗi IP.
+- **Rate Limiter**: Sử dụng `rate-limiter-flexible` với Redis để giới hạn 1000 request/10 giây mỗi IP.
 - **Retry Pattern**: Dùng `async-retry` để tự động thử lại thao tác DB/Redis khi gặp lỗi tạm thời (3 lần, delay 1-5s).
 
 
@@ -166,7 +166,7 @@ vi
 
 ---
 
-## Một số tối ưu & lưu ý
+## Một số tối ưu
 
 ### 1. **Chuyển từ SQLite sang MongoDB với ODM (Mongoose)**
 - Ban đầu nhóm có cải tiến bằng việc sử dụng thư viện Sequelize để định nghĩa Schema cho model Link.
@@ -353,8 +353,8 @@ Sau khi thực hiện test với 30000 request trong 60s, nhóm có kết quả 
 | **errors.EADDRINUSE**           | 4                  | 978              | Rate-limiter giới hạn kết nối, retry mở nhiều kết nối mới nhanh → port exhaustion.              |
 | **errors.ETIMEDOUT**            | 219                | 12 694           | Nhiều request bị giữ trong hàng đợi rate-limiter đến timeout; một số fallback sang DB gốc chậm. |
 | **http.request\_rate**          | 434 req/sec        | 326 req/sec      | Redis-based rate-limiter giới hạn xuống \~326/sec để bảo vệ hệ thống.                           |
-| **http.downloaded\_bytes**      | 177 792 bytes      | 638 929 bytes    | Cache Redis trả nhanh nội dung → lượng dữ liệu tải tăng gấp \~3,6×.                             |
-| **http.response\_time.mean**    | 1 329,8 ms         | 13,4 ms          | Hầu hết request được phục vụ từ Redis hoặc Mongo nhanh; SQLite I/O bị loại bỏ.                  |
+| **http.downloaded\_bytes**      | 177 792 bytes      | 638 929 bytes    | Cache trả nhanh nội dung → lượng dữ liệu tải tăng gấp \~3,6×.                             |
+| **http.response\_time.mean**    | 1 329,8 ms         | 13,4 ms          | Hầu hết request được phục vụ từ Cache hoặc Mongo nhanh; SQLite I/O bị loại bỏ.                  |
 | **http.response\_time.median**  | 1 300,1 ms         | 4 ms             | Median giảm mạnh nhờ cache hit cao.                                                             |
 | **http.codes.200**              | 14 816             | 8 561            | Nhiều request bị rate-limit → trả 429.                                                          |
 | **http.codes.429**              | 0                  | 7 660            | Rate-limiter chủ động trả 429 khi vượt ngưỡng.                                                  |
